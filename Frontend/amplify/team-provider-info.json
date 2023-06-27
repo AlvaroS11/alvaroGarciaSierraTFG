@@ -1,15 +1,15 @@
 {
   "staging": {
     "awscloudformation": {
-      "AuthRoleName": "amplify-tfgalvarocalendar-staging-174139-authRole",
-      "UnauthRoleArn": "arn:aws:iam::788547248635:role/amplify-tfgalvarocalendar-staging-174139-unauthRole",
-      "AuthRoleArn": "arn:aws:iam::788547248635:role/amplify-tfgalvarocalendar-staging-174139-authRole",
+      "AuthRoleName": AuthRoleName,
+      "UnauthRoleArn": UnauthRoleArn,
+      "AuthRoleArn": AuthRoleArn,
       "Region": "us-east-1",
-      "DeploymentBucketName": "amplify-tfgalvarocalendar-staging-174139-deployment",
-      "UnauthRoleName": "amplify-tfgalvarocalendar-staging-174139-unauthRole",
-      "StackName": "amplify-tfgalvarocalendar-staging-174139",
-      "StackId": "arn:aws:cloudformation:us-east-1:788547248635:stack/amplify-tfgalvarocalendar-staging-174139/7cee3a40-b921-11ed-9e23-0a0c7e170051",
-      "AmplifyAppId": "d17d2dqg17586l"
+      "DeploymentBucketName": DeploymentBucketName,
+      "UnauthRoleName": UnauthRoleName,
+      "StackName": StackName,
+      "StackId": StackId,
+      "AmplifyAppId": AmplifyAppId
     },
     "categories": {
       "auth": {
