@@ -38,19 +38,6 @@ const customError = {
       message: error.toString()
     };
     return callback(JSON.stringify(customError));
-/*
-    return{
-        statusCode: 400 ,
-         headers: {
-      "Access-Control-Allow-Origin": "*", // Required for CORS support to work
-      "Access-Control-Allow-Credentials": true, // Required for cookies, authorization headers with HTTPS
-    },
-         body: JSON.stringify({
-            message: "Failed to perform operation",
-            errorMsg: error.message,
-            errorStac: error.stack
-         })
-    }*/
 }
 }
 
@@ -60,8 +47,6 @@ const userCreation = async(event) => {
 
 
     const isLocal = event.request.userAttributes['custom:isLocal']
-    
-    
     
     if(isLocal != 'true'){
     const postItem = {

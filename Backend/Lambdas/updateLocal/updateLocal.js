@@ -3,20 +3,18 @@ import { marshall } from "@aws-sdk/util-dynamodb";
 import { ddbClient } from "./ddbClient.js";
 
 
-export const handler = async (event,context, callback) => {
+export const handler = async (event, context, callback) => {
     let body;
     const allowedFields = ['localId', 'name', 'family_name', 'phone', 'email', 'type', 'settings'];
 
 
     try {
-        
+
         console.log(event)
         const requestBody = JSON.parse(event.body);
-       // const requestBody = event
+        // const requestBody = event
         const { name, family_name, phone, email, localId, type, settings } = requestBody;
-        console.log(requestBody)
-        console.log(localId)
-        
+
         if (!localId || (event.requestContext.authorizer.sub != localId)) {  //  || (event.requestContext.authorizer.sub != localId)
             //AUTH 
             return {
@@ -27,7 +25,6 @@ export const handler = async (event,context, callback) => {
         }
 
         if (email && !isValidEmail(email)) {
-            console.log('Invalid email')
             throw new Error('Invalid email')
         }
 
@@ -37,22 +34,20 @@ export const handler = async (event,context, callback) => {
         }
 
         if (!type) {
-            console.log('Type needed')
             throw new Error('Type needed');
         }
-        
-        if(!name){
-            throw new Error('Name needed');
-    };
 
-    
+        if (!name) {
+            throw new Error('Name needed');
+        };
+
+
         if (requestBody.hasOwnProperty('settings')) {
-            try{
-            if (!areSettingsValid(settings)) {
-                console.log('Invalid settings')
-                throw new Error('Invalid settings');
-            }
-            }catch(error){
+            try {
+                if (!areSettingsValid(settings)) {
+                    throw new Error('Invalid settings');
+                }
+            } catch (error) {
                 throw new Error(error)
             }
         }
@@ -73,10 +68,6 @@ export const handler = async (event,context, callback) => {
             headers: {
                 "Access-Control-Allow-Origin": "*", // Required for CORS support to work
                 "Access-Control-Allow-Credentials": true, // Required for cookies, authorization headers with HTTPS
-                //     "Access-Control-Allow-Methods": "OPTIONS, PUT, GET, POST, DELETE",
-                //    "Access-Control-Allow-Headers": "Content-Type",
-
-
             },
             body: JSON.stringify({
                 message: `Succesfully finished operation "${event.httpMethod}"`,
@@ -86,17 +77,7 @@ export const handler = async (event,context, callback) => {
     }
     catch (error) {
         console.log(error);
-       // callback("[BadRequest]" + error)
-    /*    var myErrorObj = {
-        errorType : "InternalServerError",
-        httpStatus : 500,
-        requestId : context.awsRequestId,
-        message : "An unknown error has occurred. Please try again."
-        }
-            callback(JSON.stringify(myErrorObj));
 
-        */
-        
         return {
             statusCode: 500,
             body: JSON.stringify({
@@ -116,14 +97,6 @@ const updateLocal = async (event) => {
         delete requestBody.localId;
         delete requestBody.type
         const objKeys = Object.keys(requestBody);
-        console.log(`updateLead function. requestBody : "${requestBody}", objKeys : "${objKeys}`);
-        console.log(localId)
-        console.log(`event object: ${JSON.stringify(event)}`);
-
-
-        console.log(`requestBody: ${JSON.stringify(requestBody)}`);
-        console.log(`objKeys: ${JSON.stringify(objKeys)}`);
-
 
         const params = {
             TableName: process.env.DYNAMDOB_LOCALS_NAME,
@@ -180,28 +153,21 @@ function isPhoneNumberValid(phoneNumber) {
 }
 
 function areSettingsValid(settings) {
-    //TO DO
-
-    console.log("TESTING SETTINGS")
-    console.log(settings)
-    console.log(settings == null)
-
-
     if (settings == null) {
         throw new Error('Invalid settings');
     }
 
- 
+
     if (isNaN(settings.close))
         throw new Error('Invalid Settings')
     if (isNaN(settings.open))
         throw new Error('Invalid Settings')
     if (isNaN(settings.timePeriod))
         throw new Error('Invalid Settings')
-    if(isNaN(settings.peoplePerPeriod))
+    if (isNaN(settings.peoplePerPeriod))
         throw new Error('Invalid Settings')
-        
-    if(settings.peoplePerPeriod <= 0 || settings.peoplePerPeriod > 2000)
+
+    if (settings.peoplePerPeriod <= 0 || settings.peoplePerPeriod > 2000)
         throw new Error('Invalid Settings')
 
 
@@ -212,26 +178,24 @@ function areSettingsValid(settings) {
     if (settings.pauseStop) {
         if (isNaN(settings.pauseStop))
             throw new Error('Invalid Settings')
-        if(settings.pauseStop < settings.pauseStart)
+        if (settings.pauseStop < settings.pauseStart)
             throw new Error('Resume time must be after break time')
     }
-    
-    if(settings.close < settings.open){
+
+    if (settings.close < settings.open) {
         throw new Error('Ending time must be after starting time')
     }
-    
-    
-    const allowedFields = ['close', 'open', 'timePeriod', 'pauseStart', 'pauseStop', 'peoplePerPeriod' ]
-     const objKeys = Object.keys(settings);
 
-        console.log("PASA PRIMEROS COMP")
-        const additionalFields = objKeys.filter(key => !allowedFields.includes(key));
-        if (additionalFields.length > 0) {
-            throw new Error('Invalid Settings')
-        }
-        
+
+    const allowedFields = ['close', 'open', 'timePeriod', 'pauseStart', 'pauseStop', 'peoplePerPeriod']
+    const objKeys = Object.keys(settings);
+
+    console.log("PASA PRIMEROS COMP")
+    const additionalFields = objKeys.filter(key => !allowedFields.includes(key));
+    if (additionalFields.length > 0) {
+        throw new Error('Invalid Settings')
+    }
+
     console.log(settings)
     return true
-
-
 }

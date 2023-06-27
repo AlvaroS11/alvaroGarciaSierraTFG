@@ -17,10 +17,10 @@ export const handler = async (event) => {
                 console.log(event.pathParameters.id)
                 body = await getLocal(event.pathParameters.id)
             }
-            else{
+            else {
                 return {
                     statusCode: 500,
-                  body: JSON.stringify({ message: `Forbidden` })
+                    body: JSON.stringify({ message: `Forbidden` })
 
                 }
             }
@@ -87,7 +87,6 @@ const getLocalsByType = async (event) => {
 }*/
 
 const getAllLocals = async () => {
-    console.log("getAllLocals")
 
     try {
         const params = {
@@ -96,7 +95,7 @@ const getAllLocals = async () => {
         const { Items } = await ddbClient.send(new ScanCommand(params));
 
         console.log(Items)
-        return { Items } ? Items.map((item) => unmarshall(item)): {}
+        return { Items } ? Items.map((item) => unmarshall(item)) : {}
     }
     catch (e) {
         console.log(e)
@@ -106,19 +105,6 @@ const getAllLocals = async () => {
 
 const getLocal = async (localId) => {
     try {
-        console.log("entra getLocal")
-        console.log(typeof(localId))
-        /* const params = {   
-        
-    TableName: process.env.DYNAMODB_LOCALS_NAME,
-    
-    Key: {
-      "localId": { "S": localId }
-    }
-    
-  };
-  const response = await ddbClient.send(new GetItemCommand(params));*/
-
         const params = {
             TableName: process.env.DYNAMODB_LOCALS_NAME,
             KeyConditionExpression: "#localId = :localId",
@@ -129,14 +115,10 @@ const getLocal = async (localId) => {
                 ":localId": { "S": localId }
             }
         };
-        // try {
         const { Items } = await ddbClient.send(new QueryCommand(params));
         console.log(Items)
         return Items.map((item) => unmarshall(item));
 
-        //  } catch (e) {}
-
-        // return {Items} ? Items.map((item) => unmarshall(item)) : {}
     }
     catch (error) {
         console.log(error)

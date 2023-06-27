@@ -7,23 +7,11 @@ export const handler = async (event) => {
     let body;
 
     try {
-        console.log(event)
         const requestBody = JSON.parse(event.body);
         const allowedLead = requestBody.allow;
         const accepted = requestBody.accepted
-        console.log(accepted)
-
-        console.log(allowedLead)
-
-        console.log("*******")
-
-
-        //AUTHENTICATE
-        //IF USER:: => accepted = false (NO PUEDE ACEPTAR EL LEAD EL USUARIO)       principalId: 'user',
-
+        //IF USER:: => accepted == false (NO PUEDE ACEPTAR EL LEAD EL USUARIO)  
         //CHECK LEAD IS FROM USER
-        console.log(event)
-
 
         if (accepted == true && event.requestContext.authorizer.principalId == "user") {
 
@@ -33,13 +21,10 @@ export const handler = async (event) => {
             };
 
         }
-        //if (event.requestContext.authorizer.sub == requestBody.sub || event.requestContext.authorizer.sub == requestBody.)
 
         if (requestBody.user != null) {
             if (allowedLead && requestBody.sub != null) {
                 if (event.requestContext.authorizer.principalId == "user" && requestBody.sub == event.requestContext.authorizer.sub) {
-                    //AUTH USER
-                    console.log("PASA USER")
                     body = await denyLeadUser(event)
                 }
                 else {
@@ -69,8 +54,6 @@ export const handler = async (event) => {
         else if (allowedLead) {
             //AUTH LOCAL
             if (event.requestContext.authorizer.principalId == "local" && event.requestContext.authorizer.sub == requestBody.localId) {
-                console.log("PASA LOCAL")
-                console.log(accepted)
                 body = await denyAcceptLead(event)
             }
             else {
@@ -84,10 +67,7 @@ export const handler = async (event) => {
                 }
             }
         }
-        else {
-            //  body = await updateLead(event);
-            console.log("NO HACE NADA?")
-        }
+        else { }
         return {
             statusCode: 200,
             headers: {
@@ -114,6 +94,7 @@ export const handler = async (event) => {
         }
     }
 }
+
 const updateLead = async (event) => {
     try {
         //ADD USER AUTH
@@ -146,21 +127,11 @@ const updateLead = async (event) => {
 }
 
 const denyAcceptLead = async (event) => {
-    //TO DO
-    console.log("LLEGA DENY-ACCEPT")
     const requestBody = JSON.parse(event.body);
     const id = event.pathParameters.id;
     const accepted = requestBody.accepted
 
     const localId = requestBody.localId
-
-
-
-    console.log("**")
-    console.log(accepted)
-    console.log(id)
-    console.log("id")
-    console.log(event.pathParameters.id)
     var params = ''
     if (accepted == true) {
         params = {
@@ -174,18 +145,14 @@ const denyAcceptLead = async (event) => {
                 ':val': { BOOL: true },
                 ':rep': { BOOL: true },
                 ':local_value': { S: localId }
-
-
             },
             ConditionExpression: 'localId = :local_value',
 
         }
     }
     else if (accepted == false) {
-
         const localId = requestBody.localId
         const day = requestBody.day
-        console.log(localId, day)
 
         if (localId == null || day == null) {
             throw new Error("Invalid fields")
@@ -214,8 +181,6 @@ const denyAcceptLead = async (event) => {
         };
         const { Items } = await ddbClient.send(new QueryCommand(paramsGet));
 
-
-
         //QUITAMOS EL TIEMPO QUE ESTABA EN EL EVENTO
         var Values = Items.map((item) => unmarshall(item))[0];
 
@@ -231,80 +196,74 @@ const denyAcceptLead = async (event) => {
             if (indexToDelete !== -1) {
                 Values.times.splice(indexToDelete, 1);
             }
-            
-             const paramsUpd = {
-            TableName: process.env.DYNAMODB_TIMES_NAME,
-            Key: {
-                localId: { S: localId },
-                day: { S: day }
-            },
-            UpdateExpression: "SET times= :rep",
-            ExpressionAttributeValues: {
-                ':rep': { L: marshall(Values.times) }
+
+            const paramsUpd = {
+                TableName: process.env.DYNAMODB_TIMES_NAME,
+                Key: {
+                    localId: { S: localId },
+                    day: { S: day }
+                },
+                UpdateExpression: "SET times= :rep",
+                ExpressionAttributeValues: {
+                    ':rep': { L: marshall(Values.times) }
+                }
             }
-        }
-        
+
             const createResult = await ddbClient.send(new UpdateItemCommand(paramsUpd));
-
         }
-    
-    else{
 
-        for (var i = 0; i < Values.times.length; i++) {
-            console.log("!!!!!!!!!!!!")
-            console.log(Values.times[i])
-            if (Values.times[i].leadId == id) {
-                //IF IT FINDS, MEANS FREETIME EXISTS
-                var valIndex = Values.freeTimes.findIndex(element => element.time == Values.times[i].start)
-                if (valIndex != -1) {
-                    console.log(Values.freeTimes[valIndex].toString())
-                    console.log(JSON.stringify(Values.freeTimes[valIndex]))
-                    var val = {
-                        time: Number(Values.times[i].start),
-                        spaces: Values.freeTimes[valIndex].spaces + 1
+        else {
+
+            for (var i = 0; i < Values.times.length; i++) {
+                if (Values.times[i].leadId == id) {
+                    //IF IT FINDS, MEANS FREETIME EXISTS
+                    var valIndex = Values.freeTimes.findIndex(element => element.time == Values.times[i].start)
+                    if (valIndex != -1) {
+                        console.log(Values.freeTimes[valIndex].toString())
+                        console.log(JSON.stringify(Values.freeTimes[valIndex]))
+                        var val = {
+                            time: Number(Values.times[i].start),
+                            spaces: Values.freeTimes[valIndex].spaces + 1
+                        }
+                        //Values.freeTimes.push(Number(Values.times[i].start))
+                        Values.freeTimes[valIndex] = val
+
                     }
-                    //Values.freeTimes.push(Number(Values.times[i].start))
-                    Values.freeTimes[valIndex] = val
+                    //IF DOES NOT FIND IT, IT MEANS WE SHALL CREATE ANOTHER FREETIME WITH SPACE = 1
+                    else {
+                        var val = {
+                            time: Number(Values.times[i].start),
+                            spaces: 1
+                        }
 
-                }
-                //IF DOES NOT FIND IT, IT MEANS WE SHALL CREATE ANOTHER FREETIME WITH SPACE = 1
-                else {
-                    var val = {
-                        time: Number(Values.times[i].start),
-                        spaces: 1
+                        Values.freeTimes.push(val)
                     }
-
-                    Values.freeTimes.push(val)
+                    Values.times.splice(i, 1);
                 }
-                Values.times.splice(i, 1);
             }
-        }
+
+            console.log(Values)
+            const paramsUpd = {
+                TableName: process.env.DYNAMODB_TIMES_NAME,
+                Key: {
+                    localId: { S: localId },
+                    day: { S: day }
+                },
+                UpdateExpression: "SET freeTimes= :val, times= :rep",
+                ExpressionAttributeValues: {
 
 
-
-        console.log(Values)
-        const paramsUpd = {
-            TableName: process.env.DYNAMODB_TIMES_NAME,
-            Key: {
-                localId: { S: localId },
-                day: { S: day }
-            },
-            UpdateExpression: "SET freeTimes= :val, times= :rep",
-            ExpressionAttributeValues: {
-
-
-                ':val': { L: marshall(Values.freeTimes, { convertEmptyValues: true }) }, //hay que meterlo como numeros
-                ':rep': { L: marshall(Values.times) }
+                    ':val': { L: marshall(Values.freeTimes, { convertEmptyValues: true }) }, //hay que meterlo como numeros
+                    ':rep': { L: marshall(Values.times) }
+                }
             }
+
+            console.log("Before Upd")
+
+
+
+            const createResult = await ddbClient.send(new UpdateItemCommand(paramsUpd));
         }
-
-        console.log("Before Upd")
-
-
-
-        const createResult = await ddbClient.send(new UpdateItemCommand(paramsUpd));
-}
-        //
 
         params = {
             TableName: process.env.DYNAMDOB_LEADS_NAME,
@@ -326,13 +285,6 @@ const denyAcceptLead = async (event) => {
     }
 
     const updateResult = await ddbClient.send(new UpdateItemCommand(params));
-
-
-
-
-
-    console.log("1111")
-    console.log(updateResult)
     return updateResult
 
 }
@@ -347,155 +299,128 @@ const denyLeadUser = async (event) => {
     if (accepted == false) {
         const localId = requestBody.localId
         const day = requestBody.day
-        console.log(localId, day)
 
 
         if (day == null) {
             throw new Error("Invalid fields")
         }
-        
-          if (requestBody.hasOwnProperty("custom")) {
 
-               const params = {
-            TableName: process.env.DYNAMDOB_LEADS_NAME,
-            Key: {
-                id: { S: id }
-            }, // marshall({id: id}),
-            UpdateExpression: "SET accepted= :val, replied= :rep",
-            ExpressionAttributeValues: {
-                ':val': { BOOL: false },
-                ':rep': { BOOL: true },
-                ':sub': { S: sub }
-            },
-            ExpressionAttributeNames: {
-                '#sub': 'sub'
-            },
-            //
-            ConditionExpression: 'attribute_exists(id) AND #sub = :sub'
+        if (requestBody.hasOwnProperty("custom")) {
 
-        }
-        const updateResult = await ddbClient.send(new UpdateItemCommand(params));
-            
-          }
-          else{
+            const params = {
+                TableName: process.env.DYNAMDOB_LEADS_NAME,
+                Key: {
+                    id: { S: id }
+                }, // marshall({id: id}),
+                UpdateExpression: "SET accepted= :val, replied= :rep",
+                ExpressionAttributeValues: {
+                    ':val': { BOOL: false },
+                    ':rep': { BOOL: true },
+                    ':sub': { S: sub }
+                },
+                ExpressionAttributeNames: {
+                    '#sub': 'sub'
+                },
+                //
+                ConditionExpression: 'attribute_exists(id) AND #sub = :sub'
 
-     if (localId == null) {
-            throw new Error("Invalid fields")
-        }
-
-        //COGEMOS INFORMACION DE LOS TIEMPOS DEL LOCAL/DAY
-        const paramsGet = {
-            //IndexName:"type-index",
-            KeyConditionExpression: "#o = :localId and #s= :day",
-            ExpressionAttributeNames: {
-                "#o": "localId",
-                "#s": "day"
-            },
-            //FilterExpression: "contains (#O, :owner)",
-            ExpressionAttributeValues: {
-                ":localId": { S: localId },
-                ":day": { S: day }
-
-            },
-
-            TableName: process.env.DYNAMODB_TIMES_NAME
-        };
-        const { Items } = await ddbClient.send(new QueryCommand(paramsGet));
-
-
-
-        //QUITAMOS EL TIEMPO QUE ESTABA EN EL EVENTO
-        var Values = Items.map((item) => unmarshall(item))[0];
-
-        console.log(Values)
-
-        for (var i = 0; i < Values.times.length; i++) {
-            console.log("!!!!!!!!!!!!")
-            console.log(Values.times[i])
-            if (Values.times[i].leadId == id) {
-                //IF IT FINDS, MEANS FREETIME EXISTS
-                var valIndex = Values.freeTimes.findIndex(element => element.time == Values.times[i].start)
-                if (valIndex != -1) {
-                    console.log(Values.freeTimes[valIndex].toString())
-                    console.log(JSON.stringify(Values.freeTimes[valIndex]))
-                    var val = {
-                        time: Number(Values.times[i].start),
-                        spaces: Values.freeTimes[valIndex].spaces + 1
-                    }
-                    //Values.freeTimes.push(Number(Values.times[i].start))
-                    Values.freeTimes[valIndex] = val
-
-                }
-                //IF DOES NOT FIND IT, IT MEANS WE SHALL CREATE ANOTHER FREETIME WITH SPACE = 1
-                else {
-                    var val = {
-                        time: Number(Values.times[i].start),
-                        spaces: 1
-                    }
-
-                    Values.freeTimes.push(val)
-                }
-                Values.times.splice(i, 1);
             }
+            const updateResult = await ddbClient.send(new UpdateItemCommand(params));
+
         }
-        /*    const paramsUpd = {
-                TableName: process.env.DYNAMDOB_TIMES_NAME,
-                Item: marshall(Values || {})
+        else {
+
+            if (localId == null) {
+                throw new Error("Invalid fields")
+            }
+
+            //COGEMOS INFORMACION DE LOS TIEMPOS DEL LOCAL/DAY
+            const paramsGet = {
+                //IndexName:"type-index",
+                KeyConditionExpression: "#o = :localId and #s= :day",
+                ExpressionAttributeNames: {
+                    "#o": "localId",
+                    "#s": "day"
+                },
+                //FilterExpression: "contains (#O, :owner)",
+                ExpressionAttributeValues: {
+                    ":localId": { S: localId },
+                    ":day": { S: day }
+
+                },
+
+                TableName: process.env.DYNAMODB_TIMES_NAME
             };
-            */
+            const { Items } = await ddbClient.send(new QueryCommand(paramsGet));
 
 
 
-        console.log(Values)
-        const paramsUpd = {
-            TableName: process.env.DYNAMODB_TIMES_NAME,
-            Key: {
-                localId: { S: localId },
-                day: { S: day }
-            },
-            UpdateExpression: "SET freeTimes= :val, times= :rep",
-            ExpressionAttributeValues: {
+            //QUITAMOS EL TIEMPO QUE ESTABA EN EL EVENTO
+            var Values = Items.map((item) => unmarshall(item))[0];
 
+            for (var i = 0; i < Values.times.length; i++) {
+                if (Values.times[i].leadId == id) {
+                    //IF IT FINDS, MEANS FREETIME EXISTS
+                    var valIndex = Values.freeTimes.findIndex(element => element.time == Values.times[i].start)
+                    if (valIndex != -1) {
+                        console.log(Values.freeTimes[valIndex].toString())
+                        console.log(JSON.stringify(Values.freeTimes[valIndex]))
+                        var val = {
+                            time: Number(Values.times[i].start),
+                            spaces: Values.freeTimes[valIndex].spaces + 1
+                        }
+                        //Values.freeTimes.push(Number(Values.times[i].start))
+                        Values.freeTimes[valIndex] = val
 
-                ':val': { L: marshall(Values.freeTimes, { convertEmptyValues: true }) }, //hay que meterlo como numeros
-                ':rep': { L: marshall(Values.times) }
+                    }
+                    //IF DOES NOT FIND IT, IT MEANS WE SHALL CREATE ANOTHER FREETIME WITH SPACE = 1
+                    else {
+                        var val = {
+                            time: Number(Values.times[i].start),
+                            spaces: 1
+                        }
+
+                        Values.freeTimes.push(val)
+                    }
+                    Values.times.splice(i, 1);
+                }
             }
+            const paramsUpd = {
+                TableName: process.env.DYNAMODB_TIMES_NAME,
+                Key: {
+                    localId: { S: localId },
+                    day: { S: day }
+                },
+                UpdateExpression: "SET freeTimes= :val, times= :rep",
+                ExpressionAttributeValues: {
+                    ':val': { L: marshall(Values.freeTimes, { convertEmptyValues: true }) }, //hay que meterlo como numeros
+                    ':rep': { L: marshall(Values.times) }
+                }
+            }
+            //PRIMERO ESTO PARA VER QUE EL SUB ES EL MISMO QUE EL SUB DEL LEAD Y DESPUES UPDATE
+
+            const params = {
+                TableName: process.env.DYNAMDOB_LEADS_NAME,
+                Key: {
+                    id: { S: id }
+                }, // marshall({id: id}),
+                UpdateExpression: "SET accepted= :val, replied= :rep",
+                ExpressionAttributeValues: {
+                    ':val': { BOOL: false },
+                    ':rep': { BOOL: true },
+                    ':sub': { S: sub }
+                },
+                ExpressionAttributeNames: {
+                    '#sub': 'sub'
+                },
+                //
+                ConditionExpression: 'attribute_exists(id) AND #sub = :sub'
+
+            }
+            const updateResult = await ddbClient.send(new UpdateItemCommand(params));
+            const updateLeadDayResult = await ddbClient.send(new UpdateItemCommand(paramsUpd));
+            return updateResult
         }
-
-        console.log("Before Upd")
-
-
-        //const createResult = await ddbClient.send(new UpdateItemCommand(paramsUpd));
-
-        //ABAJO DE UPDATE LEAD
-
-
-        //PRIMERO ESTO PARA VER QUE EL SUB ES EL MISMO QUE EL SUB DEL LEAD Y DESPUES UPDATEAR
-
-        const params = {
-            TableName: process.env.DYNAMDOB_LEADS_NAME,
-            Key: {
-                id: { S: id }
-            }, // marshall({id: id}),
-            UpdateExpression: "SET accepted= :val, replied= :rep",
-            ExpressionAttributeValues: {
-                ':val': { BOOL: false },
-                ':rep': { BOOL: true },
-                ':sub': { S: sub }
-            },
-            ExpressionAttributeNames: {
-                '#sub': 'sub'
-            },
-            //
-            ConditionExpression: 'attribute_exists(id) AND #sub = :sub'
-
-        }
-        const updateResult = await ddbClient.send(new UpdateItemCommand(params));
-        const updateLeadDayResult = await ddbClient.send(new UpdateItemCommand(paramsUpd));
-        console.log(updateResult)
-        console.log(updateLeadDayResult)
-        return updateResult
-    }
     }
     else {
         throw new Error('Invalid fields')
