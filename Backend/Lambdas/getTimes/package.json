@@ -1,0 +1,20 @@
+{
+  "name": "get_Time",
+  "version": "1.0.0",
+  "description": "",
+  "main": "GetTimes.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.201.0",
+    "@aws-sdk/util-dynamodb": "^3.201.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.10"
+  }
+}

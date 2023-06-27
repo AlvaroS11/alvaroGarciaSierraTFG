@@ -1,0 +1,251 @@
+
+#app {
+    font-family: Avenir, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-align: center;
+    color: #2c3e50;
+    height: 100%;
+  }
+  
+  .vuecal {height: 90vh;}
+  
+  .sidebar2 {
+    width: 300px;
+    line-height: 1.5;
+    background: #eaf9ff;
+    border-right: 1px solid #d3e2e8;
+  }
+  
+  .sidebar2-section {
+    padding: 2em;
+  }
+  /*
+  .icon material-icons{
+    color: red;
+  }
+  */
+  .vuecal__event.leisure {background-color: rgba(253, 156, 66, 0.9);border: 1px solid rgb(233, 136, 46);color: #fff;}
+  .vuecal__event.health {background-color: rgba(164, 230, 210, 0.9);border: 1px solid rgb(144, 210, 190);}
+  .vuecal__event.sport {background-color: rgba(255, 102, 102, 0.9);border: 1px solid rgb(235, 82, 82);color: #fff;}
+  .vuecal__event.custom {background-color: rgba(164, 179, 230, 0.9);border: 1px solid rgb(144, 210, 190);}
+  .vuecal__event.accepted {background-color: rgba(41, 201, 76, 0.9);border: 1px solid rgb(144, 210, 190);}
+  .vuecal__event.denied {background-color: rgba(201, 41, 41, 0.9);border: 1px solid rgb(144, 210, 190);}
+  .vuecal__event.deleted {background-color: rgba(26, 5, 5, 0.9);border: 1px solid rgb(144, 210, 190);}
+  
+  
+  .vuecal__event {cursor: pointer;}
+  
+  .vuecal__event-title {
+    font-size: 1em;
+    font-weight: bold;
+    margin: 4px 0 0px;
+  }
+  
+  .vuecal__event-time {
+  /*  display: inline-block;*/
+    margin-bottom: 0.0125em;
+    padding-bottom: 0.0125em;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  }
+  
+  .vuecal__event-content {
+    font-style: italic;
+  }
+  
+  .v-card-title {
+    background-color: rgb(143, 169, 207);
+    display: flex;
+  }
+  
+  .flex-grow-1{
+    display: inline-block;
+    flex-grow: 1;
+  }
+  
+  
+  .main {
+    display: flex;
+    min-height: 100%;
+    font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+    font-size: 14px;
+    margin-left: 5rem;
+  }
+  
+  .TitleInfo{
+    display: flex;
+      flex: none;
+      font-size: 1.25rem;
+      font-weight: 500;
+      hyphens: auto;
+      letter-spacing: 0.0125em;
+      min-width: 0;
+      overflow-wrap: normal;
+      overflow: hidden;
+      padding: 0.5rem 1rem;
+      text-overflow: ellipsis;
+      text-transform: none;
+      white-space: nowrap;
+      word-break: normal;
+      word-wrap: break-word;
+      flex-grow: 1;
+      background-color: rgb(143, 169, 207);
+  }
+  
+  .customColor{
+    background-color: rgba(164, 179, 230, 0.9);
+  }
+  
+  .healthColor {
+    background-color: rgba(164, 230, 210, 0.9)
+  }
+  
+  .leisureColor{
+    background-color: rgba(253, 156, 66, 0.9)
+  }
+  
+  .sportColor{
+    background-color: rgba(255, 102, 102, 0.9)
+  }
+  
+  .button-accept{
+   float: left;
+   display: contents;
+  }
+  
+  .title-confirm{
+    display: flex;
+     
+      font-size: 1rem;
+      font-weight: 500;
+      hyphens: auto;
+      letter-spacing: 0.0125em;
+      min-width: 0;
+      overflow-wrap: normal;
+      overflow: hidden;
+      padding: 0.5rem 1rem;
+      text-overflow: ellipsis;
+      text-transform: none;
+     text-align: center;
+      word-break: normal;
+      word-wrap: break-word;
+      flex-grow: 1;
+      background-color: rgb(97, 155, 89);
+  }
+  
+  .confirm-del-msg{
+    word-wrap: break-word;
+  }
+  
+  .button-confirm{
+    /*margin: 1em;*/
+   /* margin: 0 auto;*/
+   margin: 0 1em;
+  
+   background-color: #af4c4c;
+    color: white;
+    font-size: 1rem;
+    border: none;
+    padding: 1rem 2rem; /* Use relative padding */
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .button-confirm-keep{
+    /*margin: 1em;*/
+   /* margin: 0 auto;*/
+   margin: 0 1em;
+  
+   background-color: #4CAF50;
+    color: white;
+    font-size: 1rem;
+    border: none;
+    padding: 1rem 2rem; /* Use relative padding */
+    border-radius: 5px;
+    cursor: pointer;
+  
+  }
+  
+  .deleted-msg{
+    margin:0 auto;
+    position: relative;
+    top: .5em;
+  }
+  
+  .accept-lead{
+    height: 20%;
+    width: 40%;
+    margin-right: 1em;
+  }
+  
+  .lead-info{
+  float: left;
+  width: 70%;
+  height: 50%;
+  }
+  /*
+  .lead-interact{
+    position: inherit !important;
+    float: left;
+  
+    top: 50%;
+    left: 80%;
+  }*/
+  
+  /*
+  .lead-interact{
+    position: absolute;
+    float: left;
+  
+    top: 55%;
+    left: 70%;
+  }*/
+  .lead-interact{
+    float: left;
+    width: 30%;
+    display: flex;
+    table-layout: fixed;
+    align-items: center;
+  }
+
+  .SnackbarText{
+    display: flex ;
+    align-items: center;
+    align-self: center;
+  }
+
+  .vuecal__time-column .vuecal__time-cell {
+    color: #5a5a5a;
+  }
+
+  .vuecal__no-event{
+    color: #939393;
+  }
+
+  .vuecal__event{
+    border: 1px solid rgb(57 88 79)  !important; 
+  }
+
+  .v-selection-control{
+    color: white;
+    position: relative;
+    margin: 0 12px !important;
+    list-style: none;
+    transition: 0.4s;
+  }
+  
+  .v-selection-control__wrapper{
+    font-family: 'boxicons'!important;
+    font-weight: normal;
+    font-style: normal;
+    font-variant: normal;
+    line-height: 1;
+    text-transform: none;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+  }
+
+  .v-switch .v-label{
+    font-size: 15px;
+    word-break: normal;
+  }
